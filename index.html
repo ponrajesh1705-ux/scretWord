@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d26">
+  <meta name="description" content="SecretWord — The Imposter Game. A pass-the-device party game for 2 to 10 players, plus a Solo Word Challenge.">
+  <title>SecretWord — The Imposter Game</title>
+  <!-- Emoji favicon, so no extra image file is needed -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕵️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- ===================== TOP BAR ===================== -->
+  <header class="topbar">
+    <button type="button" class="brand" data-action="go-home" aria-label="SecretWord home">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <span class="brand-text">Secret<span>Word</span></span>
+    </button>
+    <nav class="topnav" aria-label="Main">
+      <button type="button" class="icon-btn" data-action="nav" data-target="howto" aria-label="How to play" title="How to play">?</button>
+      <button type="button" class="icon-btn" data-action="nav" data-target="leaderboard" aria-label="Leaderboard" title="Leaderboard">🏆</button>
+      <button type="button" class="icon-btn" data-action="nav" data-target="settings" aria-label="Settings" title="Settings">⚙️</button>
+    </nav>
+  </header>
+
+  <main id="app">
+    <noscript><div class="alert alert-error">SecretWord needs JavaScript turned on to work.</div></noscript>
+
+    <!-- ===================== 1. HOME ===================== -->
+    <section class="screen active" id="screen-home" aria-labelledby="home-title">
+      <div class="hero">
+        <div class="logo-badge" aria-hidden="true">🕵️</div>
+        <h1 class="hero-title" id="home-title">Secret<span class="accent">Word</span></h1>
+        <p class="hero-sub">The Imposter Game</p>
+        <p class="hero-text">Everyone gets the same secret word — except one sneaky <strong>Imposter</strong>.
+          Give clever clues, vote out the faker, and don't give the word away!
+          Pass one phone around with 2–10 friends, or test yourself in Solo mode.</p>
+      </div>
+
+      <div id="home-resume"></div>
+
+      <div class="menu-grid">
+        <button type="button" class="menu-card menu-card-primary" data-action="start-setup">
+          <span class="menu-icon" aria-hidden="true">🎭</span>
+          <span class="menu-title">Play Multiplayer</span>
+          <span class="menu-sub">2–10 players · one device</span>
+        </button>
+        <button type="button" class="menu-card" data-action="open-solo">
+          <span class="menu-icon" aria-hidden="true">🧠</span>
+          <span class="menu-title">Solo Challenge</span>
+          <span class="menu-sub">Guess words from hints</span>
+        </button>
+        <button type="button" class="menu-card" data-action="nav" data-target="howto">
+          <span class="menu-icon" aria-hidden="true">📖</span>
+          <span class="menu-title">How to Play</span>
+          <span class="menu-sub">Rules &amp; scoring</span>
+        </button>
+        <button type="button" class="menu-card" data-action="nav" data-target="leaderboard">
+          <span class="menu-icon" aria-hidden="true">🏆</span>
+          <span class="menu-title">Leaderboard</span>
+          <span class="menu-sub">Saved scores</span>
+        </button>
+        <button type="button" class="menu-card menu-card-wide" data-action="nav" data-target="settings">
+          <span class="menu-icon" aria-hidden="true">⚙️</span>
+          <span class="menu-title">Settings</span>
+          <span class="menu-sub">Timers, custom words &amp; reset scores</span>
+        </button>
+      </div>
+      <p id="home-storage-warning" class="alert alert-warning hidden" role="status"></p>
+    </section>
+
+    <!-- ===================== 2+3. MULTIPLAYER SETUP: PLAYERS ===================== -->
+    <section class="screen" id="screen-setup-players" hidden aria-labelledby="setup-players-title">
+      <div class="screen-head">
+        <button type="button" class="back-btn" data-action="nav" data-target="home">← Home</button>
+        <span class="step-pill">Step 1 of 2</span>
+      </div>
+      <h2 id="setup-players-title">Who's playing?</h2>
+      <p class="muted">Add between 2 and 10 players. Every name must be different.</p>
+
+      <div class="card">
+        <div class="card-row">
+          <h3>Players</h3>
+          <span id="player-count" class="pill">0 / 10</span>
+        </div>
+        <div id="player-list" class="player-list"></div>
+        <button type="button" id="btn-add-player" class="btn btn-secondary btn-block" data-action="add-player">+ Add Player</button>
+      </div>
+
+      <div id="players-error" class="alert alert-error hidden" role="alert"></div>
+
+      <button type="button" class="btn btn-primary btn-lg btn-block" data-action="players-next">Next: Category &amp; Timer →</button>
+    </section>
+
+    <!-- ===================== 4. MULTIPLAYER SETUP: CATEGORY, TIMER, CUSTOM WORDS ===================== -->
+    <section class="screen" id="screen-setup-options" hidden aria-labelledby="setup-options-title">
+      <div class="screen-head">
+        <button type="button" class="back-btn" data-action="nav" data-target="setup-players">← Players</button>
+        <span class="step-pill">Step 2 of 2</span>
+      </div>
+      <h2 id="setup-options-title">Game options</h2>
+      <p class="muted" id="setup-options-summary"></p>
+
+      <div class="card">
+        <h3>Word category</h3>
+        <div id="category-grid" class="choice-grid" role="group" aria-label="Word category"></div>
+        <p id="category-info" class="small muted"></p>
+      </div>
+
+      <div class="card">
+        <h3>Clue timer</h3>
+        <p class="small muted">How long each player has to give their clue.</p>
+        <div id="timer-options" class="segmented" role="group" aria-label="Clue timer"></div>
+      </div>
+
+      <div class="card">
+        <h3>Custom words</h3>
+        <p class="small muted">Add your own words. Play them with the <strong>Custom Words</strong> category, or they are also mixed into <strong>Random Mix</strong>.</p>
+        <form id="custom-word-form" class="inline-form" autocomplete="off">
+          <label for="custom-word-input" class="sr-only">Custom word</label>
+          <input id="custom-word-input" class="input" type="text" maxlength="30" placeholder="e.g. Grandma's Kitchen">
+          <button type="submit" class="btn btn-secondary">Add</button>
+        </form>
+        <p id="custom-word-msg" class="field-msg" role="status"></p>
+        <ul id="custom-word-list" class="chip-list" aria-label="Your custom words"></ul>
+      </div>
+
+      <div id="options-error" class="alert alert-error hidden" role="alert"></div>
+
+      <button type="button" class="btn btn-primary btn-lg btn-block" data-action="start-game">Start Game 🎮</button>
+      <p class="center small"><button type="button" class="link-btn" data-action="nav" data-target="howto">Read the rules &amp; scoring</button></p>
+    </section>
+
+    <!-- ===================== 5. PRIVATE ROLE REVEAL ===================== -->
+    <section class="screen" id="screen-reveal" hidden aria-label="Role reveal">
+      <div id="reveal-content" class="center-stack"></div>
+    </section>
+
+    <!-- ===================== 6. CLUE ROUND ===================== -->
+    <section class="screen" id="screen-clue" hidden aria-label="Clue round">
+      <div id="clue-content"></div>
+    </section>
+
+    <!-- ===================== 7. VOTING ===================== -->
+    <section class="screen" id="screen-vote" hidden aria-label="Voting">
+      <div id="vote-content" class="center-stack"></div>
+    </section>
+
+    <!-- ===================== 8. VOTING RESULTS ===================== -->
+    <section class="screen" id="screen-vote-results" hidden aria-label="Voting results">
+      <div id="vote-results-content"></div>
+    </section>
+
+    <!-- ===================== IMPOSTER'S FINAL GUESS ===================== -->
+    <section class="screen" id="screen-guess" hidden aria-label="Imposter's final guess">
+      <div id="guess-content" class="center-stack"></div>
+    </section>
+
+    <!-- ===================== 9. ROUND RESULTS ===================== -->
+    <section class="screen" id="screen-results" hidden aria-label="Round results">
+      <div id="results-content"></div>
+    </section>
+
+    <!-- ===================== 10. LEADERBOARD ===================== -->
+    <section class="screen" id="screen-leaderboard" hidden aria-labelledby="leaderboard-title">
+      <div class="screen-head">
+        <button type="button" class="back-btn" data-action="back">← Back</button>
+      </div>
+      <h2 id="leaderboard-title">Leaderboard 🏆</h2>
+      <div class="tabs" role="tablist" aria-label="Leaderboard type">
+        <button type="button" class="tab" role="tab" id="tab-multi" data-action="lb-tab" data-tab="multi">Multiplayer</button>
+        <button type="button" class="tab" role="tab" id="tab-solo" data-action="lb-tab" data-tab="solo">Solo</button>
+      </div>
+      <div id="leaderboard-content"></div>
+    </section>
+
+    <!-- ===================== 11. SOLO CHALLENGE ===================== -->
+    <section class="screen" id="screen-solo" hidden aria-label="Solo Word Challenge">
+      <div id="solo-content"></div>
+    </section>
+
+    <!-- ===================== 12. HOW TO PLAY ===================== -->
+    <section class="screen" id="screen-howto" hidden aria-labelledby="howto-title">
+      <div class="screen-head">
+        <button type="button" class="back-btn" data-action="back">← Back</button>
+      </div>
+      <h2 id="howto-title">How to Play 📖</h2>
+
+      <div class="card">
+        <h3>🎭 Multiplayer (2–10 players, one device)</h3>
+        <ol class="steps-list">
+          <li><strong>Setup:</strong> enter every player's name, pick a word category and a clue timer (15, 30 or 45 seconds).</li>
+          <li><strong>Secret roles:</strong> the game picks one secret word and secretly makes <strong>one</strong> player the <strong>Imposter</strong>. Everyone else is a regular player and gets the same word.</li>
+          <li><strong>Pass the device:</strong> each player privately taps <em>Reveal My Role</em>, remembers it, then taps <em>Hide &amp; Pass</em>. The Imposter only sees the category — not the word.</li>
+          <li><strong>Clue round:</strong> one by one, each player says a clue about the word out loud — but never the word itself. The Imposter must bluff! The host can start, pause, resume or skip the timer.</li>
+          <li><strong>Voting:</strong> pass the device again. Each player secretly votes for who they think the Imposter is. You can't vote for yourself, and no votes are shown until everyone has voted.</li>
+          <li><strong>Result:</strong> the player with the most votes is revealed. If they are the Imposter, they get <strong>one final guess</strong> at the secret word.</li>
+          <li><strong>Ties:</strong> if the vote is tied, everyone revotes, choosing only between the tied players. If it is <em>still</em> tied, nobody is caught and the Imposter escapes.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3>⭐ Multiplayer scoring</h3>
+        <div id="scoring-rules"></div>
+        <p class="small muted">Points are added once per round, to the current game score and to the saved leaderboard.</p>
+      </div>
+
+      <div class="card">
+        <h3>💡 Clue tips</h3>
+        <ul class="bullet-list">
+          <li>Be vague enough that the Imposter can't work out the word…</li>
+          <li>…but clear enough that other players know you're not the Imposter.</li>
+          <li>Imposter: listen closely to earlier clues and give something that fits.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>👥 Playing with only 2 players</h3>
+        <p class="muted">It works, but it's mostly a bluffing game: each player knows that if they are not the Imposter, the other person is. Votes will usually tie, so the Imposter often escapes. For the best social-deduction fun, play with 4 or more.</p>
+      </div>
+
+      <div class="card">
+        <h3>🧠 Solo Word Challenge</h3>
+        <div id="solo-rules"></div>
+      </div>
+
+      <div class="card">
+        <h3>🔒 About privacy</h3>
+        <p class="muted">SecretWord is a casual pass-the-device game. Roles are hidden on screen, but someone who opens the browser's developer tools could find the word. Play fair and have fun!</p>
+      </div>
+    </section>
+
+    <!-- ===================== 13. SETTINGS ===================== -->
+    <section class="screen" id="screen-settings" hidden aria-labelledby="settings-title">
+      <div class="screen-head">
+        <button type="button" class="back-btn" data-action="back">← Back</button>
+      </div>
+      <h2 id="settings-title">Settings ⚙️</h2>
+
+      <div class="card">
+        <h3>Default clue timer</h3>
+        <div id="settings-timer" class="segmented" role="group" aria-label="Default clue timer"></div>
+      </div>
+
+      <div class="card">
+        <h3>Solo timer (per word)</h3>
+        <div id="settings-solo-timer" class="segmented" role="group" aria-label="Solo timer"></div>
+      </div>
+
+      <div class="card">
+        <h3>Custom words</h3>
+        <p class="small muted" id="settings-custom-info"></p>
+        <form id="settings-custom-form" class="inline-form" autocomplete="off">
+          <label for="settings-custom-input" class="sr-only">Custom word</label>
+          <input id="settings-custom-input" class="input" type="text" maxlength="30" placeholder="Add a custom word">
+          <button type="submit" class="btn btn-secondary">Add</button>
+        </form>
+        <p id="settings-custom-msg" class="field-msg" role="status"></p>
+        <ul id="settings-custom-list" class="chip-list" aria-label="Your custom words"></ul>
+        <button type="button" class="btn btn-ghost btn-block" data-action="clear-custom">Clear all custom words</button>
+      </div>
+
+      <div class="card danger-zone">
+        <h3>Saved scores</h3>
+        <p class="small muted">Scores are saved only in this browser on this device.</p>
+        <div class="stack">
+          <button type="button" class="btn btn-ghost btn-block" data-action="reset-multi">Reset multiplayer leaderboard</button>
+          <button type="button" class="btn btn-ghost btn-block" data-action="reset-solo">Reset solo scores</button>
+          <button type="button" class="btn btn-danger btn-block" data-action="reset-all">Reset ALL scores &amp; settings</button>
+        </div>
+      </div>
+      <p id="settings-status" class="center small muted" role="status"></p>
+    </section>
+  </main>
+
+  <footer class="footer">SecretWord · a pass-the-device party game · no sign-up, no ads</footer>
+
+  <!-- Toast messages appear here -->
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- Confirmation pop-up (used for resets, leaving games, 2-player warning, etc.) -->
+  <div id="modal-backdrop" class="modal-backdrop hidden" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-message">
+      <h3 id="modal-title">Are you sure?</h3>
+      <div id="modal-message" class="muted"></div>
+      <div class="modal-actions">
+        <button type="button" id="modal-cancel" class="btn btn-ghost">Cancel</button>
+        <button type="button" id="modal-confirm" class="btn btn-primary">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
